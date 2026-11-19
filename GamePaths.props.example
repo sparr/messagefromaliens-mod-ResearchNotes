@@ -1,0 +1,10 @@
+<!--
+  Copy this file to GamePaths.props and edit it. GamePaths.props is ignored by git.
+  A -p:SteamLibraryDir=... argument or a SteamLibraryDir environment variable overrides it.
+-->
+<Project>
+  <PropertyGroup>
+    <!-- The Steam library folder whose steamapps/common/ contains Message From Aliens. -->
+    <SteamLibraryDir Condition="'$(SteamLibraryDir)' == ''">/path/to/SteamLibrary</SteamLibraryDir>
+  </PropertyGroup>
+</Project>

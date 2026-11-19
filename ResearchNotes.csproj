@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>ResearchNotes</AssemblyName>
+    <RootNamespace>ResearchNotes</RootNamespace>
+    <Version>0.1.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!--
+    The game folder is $(SteamLibraryDir)/steamapps/common/Message From Aliens.
+    SteamLibraryDir comes from, in order of precedence: -p:SteamLibraryDir=..., an environment
+    variable of the same name, GamePaths.props (copy GamePaths.props.example), or Steam's
+    default install location. Set GameDir instead for a game folder outside a Steam library.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)GamePaths.props" Condition="Exists('$(MSBuildThisFileDirectory)GamePaths.props')" />
+  <PropertyGroup>
+    <SteamLibraryDir Condition="'$(SteamLibraryDir)' == '' And $([MSBuild]::IsOSPlatform('Windows'))">$(MSBuildProgramFiles32)\Steam</SteamLibraryDir>
+    <SteamLibraryDir Condition="'$(SteamLibraryDir)' == ''">$(HOME)/.local/share/Steam</SteamLibraryDir>
+    <GameDir Condition="'$(GameDir)' == ''">$(SteamLibraryDir)/steamapps/common/Message From Aliens</GameDir>
+    <ManagedDir>$(GameDir)/MessageFromAliens_Data/Managed</ManagedDir>
+    <BepInExCoreDir>$(GameDir)/BepInEx/core</BepInExCoreDir>
+    <PluginDeployDir>$(GameDir)/BepInEx/plugins/$(AssemblyName)</PluginDeployDir>
+    <DeployToGame Condition="'$(DeployToGame)' == ''">false</DeployToGame>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx" HintPath="$(BepInExCoreDir)/BepInEx.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="$(BepInExCoreDir)/0Harmony.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath="$(ManagedDir)/Assembly-CSharp.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro" HintPath="$(ManagedDir)/Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="$(ManagedDir)/UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedDir)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UI" HintPath="$(ManagedDir)/UnityEngine.UI.dll" Private="false" />
+    <Reference Include="UnityEngine.UIModule" HintPath="$(ManagedDir)/UnityEngine.UIModule.dll" Private="false" />
+  </ItemGroup>
+
+  <Target Name="CheckGameDir" BeforeTargets="ResolveAssemblyReferences" Condition="!Exists('$(ManagedDir)/Assembly-CSharp.dll')">
+    <Error Text="Message From Aliens not found in '$(GameDir)'. Set SteamLibraryDir or GameDir; see README.md." />
+  </Target>
+
+  <Target Name="DeployPlugin" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true'">
+    <MakeDir Directories="$(PluginDeployDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDeployDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(PluginDeployDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+  </Target>
+
+</Project>
