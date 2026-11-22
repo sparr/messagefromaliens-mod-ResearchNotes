@@ -1,13 +1,14 @@
 using System.Collections.Generic;
+using HarmonyLib;
 
 namespace ResearchNotes
 {
     // The notes areas, ticked once a frame and rebuilt after every redraw.
     internal static class Notes
     {
-        private static readonly NoteArea[] Areas = { new WordNotes() };
+        private static readonly NoteArea[] Areas = { new WordNotes(), new StageNotes() };
 
-        // The field stays while the game hides translations; it holds the player's own text.
+        // The fields stay while the game hides translations; they hold the player's own text.
         private static bool Visible => Plugin.Enabled.Value;
 
         internal static void MarkDirty()
@@ -117,5 +118,45 @@ namespace ResearchNotes
             }
             return words.Count > 0 ? string.Join(" ", words) : null;
         }
+    }
+
+    // A note for each stage of the understand rule game, in the top right of the right panel's
+    // lower part, which holds the stage's examples and tests: columns 18 to 23 on rows 2 to 5.
+    // The example and test lines are at most six glyphs wide, so only wrapped lines, such as the
+    // rule shown after a win, take rows away.
+    internal sealed class StageNotes : NoteArea
+    {
+        internal const string KeyPrefix = "researchnotes.level:";
+        private const string Page = "understand rule";
+
+        private static readonly AccessTools.FieldRef<Draw, int> Level = AccessTools.FieldRefAccess<Draw, int>("understand_lv");
+
+        protected override string Name => "Stage";
+        protected override int FirstColumn => 18;
+        protected override int LastColumn => 23;
+        // The game puts one line of buttons above the divider on a stage's page.
+        protected override int FirstRow => 2;
+        protected override int MaxRows => 4;
+        protected override string Sector => "righttextdown";
+
+        private string lastPage;
+        private int lastLevel;
+
+        protected override bool StateChanged(Draw m)
+        {
+            var page = m.current_page;
+            var level = Level(m);
+            if (page == lastPage && level == lastLevel)
+            {
+                return false;
+            }
+            lastPage = page;
+            lastLevel = level;
+            return true;
+        }
+
+        // Level 0 is the list of stages.
+        protected override string Key(Draw m) =>
+            lastPage == Page && lastLevel != 0 ? KeyPrefix + lastLevel : null;
     }
 }

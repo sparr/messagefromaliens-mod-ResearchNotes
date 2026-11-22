@@ -1,6 +1,6 @@
 # Research Notes
 
-A [BepInEx 5](https://github.com/BepInEx/BepInEx) plugin for [Message From Aliens](https://store.steampowered.com/app/1858720/Message_From_Aliens/) that adds a freeform notes field to each glyph's information panel.
+A [BepInEx 5](https://github.com/BepInEx/BepInEx) plugin for [Message From Aliens](https://store.steampowered.com/app/1858720/Message_From_Aliens/) that adds freeform notes fields to each glyph's information panel and to each stage of the minigame with seven stages.
 
 ![Screenshot](screenshot.png)
 
@@ -16,7 +16,9 @@ Click the field to type in it. Enter starts a new line, and the arrow keys move 
 
 The field spans the last five columns of the first three rows, to the right of the word type and composition lines. A row that holds glyphs in those columns is left out, so the field is shorter for glyphs whose definition starts on the third row.
 
-Notes are saved in your save slot alongside the game's own translations, as entries whose names start with `researchnotes.note:`. The game ignores them. They stay in the save if the mod is removed. The field stays visible while the game hides translations and can be disabled separately.
+Each of the seven stages of the minigame with seven stages has its own notes field, in the top right corner of the lower part of the right panel, below the line of buttons. It spans the last six columns of the first four rows there. As for glyphs, a row that holds glyphs in those columns is left out, along with the rows below it. The field is not shown on the list of stages.
+
+Notes are saved in your save slot alongside the game's own translations, as entries whose names start with `researchnotes.note:` for glyphs and `researchnotes.level:` for stages. The game ignores them. They stay in the save if the mod is removed. The fields stay visible while the game hides translations and can be disabled separately.
 
 ## Configuration
 
@@ -24,7 +26,7 @@ Notes are saved in your save slot alongside the game's own translations, as entr
 
 | Key | Default | Effect |
 |---|---|---|
-| `Notes.Enabled` | `true` | Show the notes field. |
+| `Notes.Enabled` | `true` | Show the notes fields. |
 
 The setting is tagged with its name in glyphs, and the mod names itself in glyphs, so Mod Settings can show them in the game.
 
@@ -55,4 +57,4 @@ For a game folder outside a Steam library, set `GameDir` to the game folder the 
 
 | Method | Patch |
 |---|---|
-| `Draw.UpdateText` | Postfix: marks the left panel as changed, so the notes field is placed and filled again after the redraw, in the same frame. |
+| `Draw.UpdateText` | Postfix: marks the left panel as changed, so the notes fields are placed and filled again after the redraw, in the same frame. |

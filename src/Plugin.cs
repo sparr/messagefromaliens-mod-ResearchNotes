@@ -28,7 +28,7 @@ namespace ResearchNotes
             Log = Logger;
 
             Enabled = Config.Bind("Notes", "Enabled", true,
-                Described("Show a notes field in the top right of a glyph's information panel.", NameGlyphs));
+                Described("Show notes fields in a glyph's information panel and in each stage of the minigame with seven stages.", NameGlyphs));
 
             Config.SettingChanged += (_, _) => Notes.MarkDirty();
 
