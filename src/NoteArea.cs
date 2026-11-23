@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,7 +17,6 @@ namespace ResearchNotes
     // Global.savedata.dict under that key.
     internal abstract class NoteArea
     {
-        private const int CharacterLimit = 4000;
         // World units between the cells' edges and the outline, and between the outline and the text.
         private const float Inset = 0.12f;
         private const float Padding = 0.1f;
@@ -32,6 +32,12 @@ namespace ResearchNotes
         protected abstract int MaxRows { get; }
         // The sector of the glyphs that take rows away from the area.
         protected abstract string Sector { get; }
+        protected virtual int CharacterLimit => 4000;
+        // Whether the area's left and bottom sides are drawn. Without them, the area is bounded
+        // only by the game's dividers and the screen's edge.
+        protected virtual bool Outlined => true;
+        // Whether the area's setting is on.
+        internal virtual bool Enabled => Plugin.Enabled.Value;
 
         // Whether the game state the note depends on changed since the last call, apart from a
         // redraw. Records the new state. Called every frame.
@@ -106,6 +112,26 @@ namespace ResearchNotes
             return n;
         }
 
+        // The words of the left panel's title as drawn, or null when it shows none. Another mod,
+        // such as Calculator, may draw over the left panel without a history entry of its own,
+        // so a note for the panel's entry is shown only while its title is drawn.
+        protected static string DrawnTitle(Draw m)
+        {
+            if (m.alien_left_title == null)
+            {
+                return null;
+            }
+            var words = new List<string>();
+            foreach (var ac in m.alien_left_title)
+            {
+                if (ac != null && ac.gameObject.activeInHierarchy && ac.sector == "lefttitle")
+                {
+                    words.Add(ac.alien_txt);
+                }
+            }
+            return words.Count > 0 ? string.Join(" ", words) : null;
+        }
+
         private static string Get(string k)
         {
             var dict = Global.savedata?.dict;
@@ -132,7 +158,7 @@ namespace ResearchNotes
             if (field == null)
             {
                 field = CreateInput(m);
-                outline = CreateOutline(m);
+                outline = Outlined ? CreateOutline(m) : null;
             }
             var editing = field.isFocused && k == key;
             if (!editing)
@@ -273,6 +299,10 @@ namespace ResearchNotes
 
         private void PlaceOutline(Draw m)
         {
+            if (outline == null)
+            {
+                return;
+            }
             Area(m, out var min, out var max);
             min += Vector2.one * Inset;
             outline.SetPosition(0, new Vector3(min.x, max.y));

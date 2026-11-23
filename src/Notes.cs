@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HarmonyLib;
 
 namespace ResearchNotes
@@ -6,10 +5,7 @@ namespace ResearchNotes
     // The notes areas, ticked once a frame and rebuilt after every redraw.
     internal static class Notes
     {
-        private static readonly NoteArea[] Areas = { new WordNotes(), new StageNotes() };
-
-        // The fields stay while the game hides translations; they hold the player's own text.
-        private static bool Visible => Plugin.Enabled.Value;
+        private static readonly NoteArea[] Areas = { new WordNotes(), new StageNotes(), new PageNotes() };
 
         internal static void MarkDirty()
         {
@@ -22,10 +18,10 @@ namespace ResearchNotes
         internal static void Tick()
         {
             var m = Global.manager;
-            var visible = Visible;
+            // The fields stay while the game hides translations; they hold the player's own text.
             foreach (var a in Areas)
             {
-                a.Tick(m, visible);
+                a.Tick(m, a.Enabled);
             }
         }
     }
@@ -99,24 +95,6 @@ namespace ResearchNotes
             // Another mod, such as Calculator, may draw over the left panel without a history
             // entry of its own, so the drawn title must be the entry's.
             return DrawnTitle(m) == title ? title : null;
-        }
-
-        // The words of the left panel's title as drawn, or null when it shows none.
-        private static string DrawnTitle(Draw m)
-        {
-            if (m.alien_left_title == null)
-            {
-                return null;
-            }
-            var words = new List<string>();
-            foreach (var ac in m.alien_left_title)
-            {
-                if (ac != null && ac.gameObject.activeInHierarchy && ac.sector == "lefttitle")
-                {
-                    words.Add(ac.alien_txt);
-                }
-            }
-            return words.Count > 0 ? string.Join(" ", words) : null;
         }
     }
 

@@ -11,6 +11,7 @@ using HarmonyLib;
 namespace ResearchNotes
 {
     [BepInPlugin(Guid, Name, Version)]
+    [BepInDependency(InterfaceTweaksPageNotes.Guid, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "sparr.messagefromaliens.researchnotes";
@@ -22,6 +23,7 @@ namespace ResearchNotes
 
         internal static ManualLogSource Log;
         internal static ConfigEntry<bool> Enabled;
+        internal static ConfigEntry<bool> PageNotes;
 
         private void Awake()
         {
@@ -29,10 +31,14 @@ namespace ResearchNotes
 
             Enabled = Config.Bind("Notes", "Enabled", true,
                 Described("Show notes fields in a glyph's information panel and in each stage of the minigame with seven stages.", NameGlyphs));
+            PageNotes = Config.Bind("Notes", "PageNotes", true,
+                Described("While the left panel shows a page's explanation, the explain button opens a notes page for that page instead, with a field for English text. While a page's notes show, opening another page shows its notes.", "page draw"));
 
             Config.SettingChanged += (_, _) => Notes.MarkDirty();
 
-            new Harmony(Guid).PatchAll(typeof(Plugin).Assembly);
+            var harmony = new Harmony(Guid);
+            harmony.PatchAll(typeof(Plugin).Assembly);
+            InterfaceTweaksPageNotes.Disable(harmony);
             Log.LogInfo($"{Name} {Version} loaded");
         }
 
