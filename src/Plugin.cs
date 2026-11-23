@@ -16,7 +16,7 @@ namespace ResearchNotes
     {
         public const string Guid = "sparr.messagefromaliens.researchnotes";
         public const string Name = "Research Notes";
-        public const string Version = "0.1.0";
+        public const string Version = "0.2.0";
 
         // The mod's name and its setting's label, as game word IDs.
         internal const string NameGlyphs = "linguistics de science de write";
